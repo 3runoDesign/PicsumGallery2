@@ -1,40 +1,29 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
+import { StyleSheet, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { DependencyProvider } from './src/core/dependenciesContext';
+import { queryClient } from './src/core/queryClient';
+import AppNavigator from './src/navigation/AppNavigator';
+import { persistor, store } from './src/redux/store';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
+const App = () => {
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={styles.container}>
+      <Provider store={store}>
+        <PersistGate loading={<Text>Carregando...</Text>} persistor={persistor}>
+          <QueryClientProvider client={queryClient}>
+            <DependencyProvider>
+              <AppNavigator />
+            </DependencyProvider>
+          </QueryClientProvider>
+        </PersistGate>
+      </Provider>
+    </GestureHandlerRootView>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
