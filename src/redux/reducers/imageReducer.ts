@@ -1,3 +1,6 @@
+import { ClearAllImagesUseCase } from '@/data/usecases/clearAllImages';
+import { DeleteImageUseCase } from '@/data/usecases/deleteImage';
+import { ListSavedImagesUseCase } from '@/data/usecases/listImages';
 import { SaveImageUseCase } from '@/data/usecases/saveImage';
 import { Image } from '@/domain/entities/Image';
 import { ImageDownloadService } from '@/services/imageDownloadService';
@@ -10,11 +13,13 @@ const initialState: ImageState = {
     save: 'idle',
     delete: 'idle',
     clearAll: 'idle',
+    list: 'idle',
   },
   errors: {
     save: null,
     delete: null,
     clearAll: null,
+    list: null,
   },
 };
 
@@ -44,14 +49,36 @@ export const saveImage = createAsyncThunk(
 
 export const deleteImage = createAsyncThunk(
   'images/deleteImage',
-  async (id: string) => {
+  async (id: string, { extra }) => {
+    const { deleteUseCase } = extra as {
+      deleteUseCase: DeleteImageUseCase;
+    };
+
+    await deleteUseCase.execute(id);
     return id;
   },
 );
 
 export const clearAllImages = createAsyncThunk(
   'images/clearAllImages',
-  async () => {},
+  async (_, { extra }) => {
+    const { clearAllUseCase } = extra as {
+      clearAllUseCase: ClearAllImagesUseCase;
+    };
+
+    await clearAllUseCase.execute();
+  },
+);
+
+export const listImages = createAsyncThunk(
+  'images/listImages',
+  async (_, { extra }) => {
+    const { listUseCase } = extra as {
+      listUseCase: ListSavedImagesUseCase;
+    };
+
+    return await listUseCase.execute();
+  },
 );
 
 const imageSlice = createSlice({
@@ -136,6 +163,20 @@ const imageSlice = createSlice({
         state.status.clearAll = 'failed';
         state.errors.clearAll =
           action.error.message || 'Erro ao limpar imagens';
+      });
+
+    builder
+      .addCase(listImages.pending, state => {
+        state.status.list = 'pending';
+        state.errors.list = null;
+      })
+      .addCase(listImages.fulfilled, (state, action) => {
+        state.status.list = 'succeeded';
+        state.savedImages = action.payload;
+      })
+      .addCase(listImages.rejected, (state, action) => {
+        state.status.list = 'failed';
+        state.errors.list = action.error.message || 'Erro ao listar imagens';
       });
   },
 });

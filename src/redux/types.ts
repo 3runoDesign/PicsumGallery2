@@ -7,11 +7,13 @@ export interface ImageState {
     save: LoadingStatus;
     delete: LoadingStatus;
     clearAll: LoadingStatus;
+    list: LoadingStatus;
   };
   errors: {
     save: string | null;
     delete: string | null;
     clearAll: string | null;
+    list: string | null;
   };
 }
 
