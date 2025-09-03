@@ -4,6 +4,7 @@ import { ListSavedImagesUseCase } from '@/data/usecases/listImages';
 import { SaveImageUseCase } from '@/data/usecases/saveImage';
 import { Image } from '@/domain/entities/Image';
 import { ImageDownloadService } from '@/services/imageDownloadService';
+import { ReactotronHelpers } from '@/utils/reactotronHelpers';
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { ImageState } from '../types';
 
@@ -53,6 +54,8 @@ export const deleteImage = createAsyncThunk(
     const { deleteUseCase } = extra as {
       deleteUseCase: DeleteImageUseCase;
     };
+
+    ReactotronHelpers.log('HUUUUM', id);
 
     await deleteUseCase.execute(id);
     return id;
@@ -128,6 +131,7 @@ const imageSlice = createSlice({
 
     builder
       .addCase(deleteImage.pending, state => {
+        ReactotronHelpers.log('huuum1 pending');
         state.status.delete = 'pending';
         state.errors.delete = null;
       })

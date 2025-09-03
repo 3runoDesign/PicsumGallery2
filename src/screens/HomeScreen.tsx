@@ -14,6 +14,7 @@ import { ImageWithLocalSupport } from '../presentation/components/ImageWithLocal
 import { useImageHistory } from '../presentation/hooks/useImageHistory';
 import { useImageOperations } from '../presentation/hooks/useImageOperations';
 import { useRandomImage } from '../presentation/hooks/useRandomImage';
+import { ReactotronHelpers } from '../utils/reactotronHelpers';
 
 type HomeScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -52,24 +53,51 @@ export default function HomeScreen() {
     }
   }, [randomImage, addImage]);
 
+  useEffect(() => {
+    ReactotronHelpers.log('HomeScreen montado', {
+      savedImagesCount: savedImages.length,
+      hasRandomImage: !!randomImage,
+    });
+  }, [savedImages.length, randomImage]);
+
+  useEffect(() => {
+    ReactotronHelpers.log('Estado das imagens salvas atualizado', {
+      count: savedImages.length,
+      images: savedImages.map(img => ({ id: img.id, author: img.author })),
+    });
+  }, [savedImages]);
+
   const currentImage = getCurrentImage();
   const currentImageIsSaved = isCurrentImageSaved();
 
   const handleGoBack = useCallback(() => {
+    ReactotronHelpers.log('Navegando para imagem anterior');
     goToPrevious();
   }, [goToPrevious]);
 
   const handleNewImage = useCallback(() => {
+    ReactotronHelpers.log('Solicitando nova imagem aleatória');
     refreshRandomImage();
   }, [refreshRandomImage]);
 
   const handleSaveImage = useCallback(async () => {
     if (!currentImage) return;
 
+    ReactotronHelpers.log('Iniciando salvamento de imagem', {
+      imageId: currentImage.id,
+      author: currentImage.author,
+    });
+
     try {
       await saveImage(currentImage);
+      ReactotronHelpers.log('Imagem salva com sucesso', {
+        imageId: currentImage.id,
+      });
     } catch (error) {
-      console.error('Erro ao salvar imagem:', error);
+      ReactotronHelpers.error('Erro ao salvar imagem', {
+        imageId: currentImage.id,
+        error: error,
+      });
     }
   }, [currentImage, saveImage]);
 

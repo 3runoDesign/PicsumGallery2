@@ -10,6 +10,7 @@ import {
   REGISTER,
   REHYDRATE,
 } from 'redux-persist';
+import reactotron from '../config/ReactotronConfig';
 import { fileCleanupMiddleware } from './middleware/fileCleanupMiddleware';
 import imageReducer from './reducers/imageReducer';
 
@@ -50,6 +51,13 @@ export const store = configureStore({
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }).concat(fileCleanupMiddleware),
+  enhancers: getDefaultEnhancers => {
+    const enhancers = getDefaultEnhancers();
+    if (__DEV__) {
+      enhancers.push(reactotron.createEnhancer());
+    }
+    return enhancers;
+  },
 });
 
 export const persistor = persistStore(store);
